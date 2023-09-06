@@ -1,49 +1,95 @@
 import React, {useState} from 'react';
 import { Paper, Grid, TextField, Button, InputAdornment, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { useMediaQuery } from '@mui/material';
+import axios from 'axios';
+import { Link as MuiLink } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
-import schoolLogo from './server/public/assets/img/DonjuanTransparent.png';
-import clinicLogo from './server/public/assets/img/medical.png';
+import schoolLogo from './Data/DonjuanTransparent.png';
+import clinicLogo from './Data/medical.png';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [user_email, setEmail] = useState('');
+  const [user_password, setPassword] = useState('');
+  const [emailRequired, setEmailRequired] = useState(false);
+  const [passwordRequired, setPasswordRequired] = useState(false);
+  const [emailFormatValid, setEmailFormatValid] = useState(true);
 
   const handleShowPasswordClick = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
-  const handleLogin = () => {
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 
-    if (email === 'admin@example.com' && password === '1234') {
-      setTimeout(() => {
+  const handleLogin = async () => {
+
+    // Reset previous validation messages
+    setEmailRequired(false);
+    setEmailFormatValid(true);
+    setPasswordRequired(false);
+
+    // Check if email and password are not empty
+    if (!user_email) {
+      setEmailRequired(true);
+    }
+    if (!user_password) {
+      setPasswordRequired(true);
+    }
+
+    // Validate email format
+    if (!emailRegex.test(user_email)) {
+      setEmailFormatValid(false);
+      return;
+    }
+
+    // If any validation message is displayed, don't proceed with login
+    if (emailRequired || passwordRequired) {
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5000/login', {
+        user_email: user_email,
+        user_password: user_password,
+      });
+
+      if (response.data.token) {
+        const token = response.data.token;
+
+        localStorage.setItem('authToken', token);
+
         navigate('/dashboard');
-      }, 2000);
-    }else{
+      } else {
+        setShowWarning(true);
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
       setShowWarning(true);
     }
   };
-
+  
   const handleCloseWarning = () => {
     setShowWarning(false);
   };
+
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
+
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
       {/* Left-side Image */}
-      <Grid item xs={12} sm={4} md={7} sx={{ backgroundColor: '#6C63FF', minHeight: '100vh' }}>
-        <div className="flex justify-center items-center h-full">
-          <img src={clinicLogo} alt="School Logo" style={{ width: '600px', height: '430px' }} />
+      <Grid item xs={12} sm={4} md={7} sx={{ display: isSmallScreen ? 'none' : 'block', backgroundColor: '#6C63FF', minHeight: '100vh' }}>
+          <div className="flex justify-center items-center h-full">
+            <img src={clinicLogo} alt="Clinic Logo" style={{ width: '600px', height: '430px' }} />
         </div>
-      </Grid>
+          </Grid>
 
       {/* Right-side Login Form */}
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <Grid container justifyContent="center" alignItems="center" sx={{ height: '100%' }}>
+      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: isSmallScreen ? 'transparent' : '#FFF' }}>
           <Grid item xs={10} sm={8} md={6}>
             {/* Add form components here */}
             <div className="flex flex-col space-y-4 text-center">
@@ -54,14 +100,23 @@ const LoginPage = () => {
               <div className="flex items-start">
                 <h2 className="text-4xl font-bold">Login</h2>
               </div>
-              <TextField label="Email" fullWidth margin="normal" value = {email} onChange={(e) => setEmail(e.target.value)} />
+              <TextField 
+              label="Email" 
+              fullWidth margin="normal" 
+              value = {user_email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              autoComplete="user_email"
+              error={emailRequired || !emailFormatValid}
+              helperText={emailRequired ? 'Email required' : !emailFormatValid ? 'Invalid email format' : ''}
+              />
               <TextField
                 label="Password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? 'text' : 'user_password'}
                 fullWidth
                 margin="normal"
-                value={password}
+                value={user_password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -73,30 +128,27 @@ const LoginPage = () => {
                       )}
                     </InputAdornment>
                   ),
-                }}/>
+                }}
+              error={passwordRequired}
+              helperText={passwordRequired ? 'Password required' : ''}
+                />
            
-              <div className="flex justify-between w-full">
-                <div>
-                  <input type="checkbox" />
-                  <label className="ml-2">Remember me</label>
-                </div>
-                <a href="#forgot-password">Forgot password?</a>
-              </div>
+           <div className="flex justify-between w-full">
+            <a href="#forgot-password" className="text-gray-700 hover:underline">
+              Forgot password?
+            </a>
+            <MuiLink component={RouterLink} to="/register" className="text-black hover:underline">
+               Sign up here
+            </MuiLink>
+            </div>
               <div className="flex justify-center mt-4">
                 <Button variant="contained" style={{ width: '150px', height: '50px', borderRadius: '10px', backgroundColor: '#020826' }} onClick={handleLogin}>
                   Login
                 </Button>
               </div>
-              <div className="flex justify-center mt-4">
-                <span style={{ color: '#707070' }}>Don’t have an account?</span>{' '}
-                <Link to="/register" className="font-semibold">
-                  Sign up here
-                </Link>
-              </div>
             </div>
           </Grid>
         </Grid>
-      </Grid>
       <Dialog open={showWarning} onClose={handleCloseWarning}>
         <DialogTitle>Invalid Credentials</DialogTitle>
         <DialogContent>

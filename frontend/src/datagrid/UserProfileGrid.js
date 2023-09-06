@@ -5,14 +5,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import ManageUserForm from '../forms/StudentProfileForm.js'
+import ManageUserForm from '../forms/UserProfileForm.js'
 import axios from 'axios';
 
-const StudentProfileGrid = () => {
+const UserProfileGrid = () => {
 
   const [searchValue, setSearchValue] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [studentProfile, setStudentProfile] = useState([]);
+  const [userProfile, setUserProfile] = useState([]);
   
   const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
@@ -27,45 +27,44 @@ const StudentProfileGrid = () => {
   // };
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/student-profile')
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/user-profile');
         const modifiedData = response.data.map((item) => ({
           id: item._id,
-          stud_lrn: item.stud_lrn, 
-          stud_name: item.stud_lastName + ",\n" + item.stud_firstName + "\n" + item.stud_middleName,
-          stud_gender: item.stud_gender,
-          stud_mobileNumber: item.stud_mobileNumber, 
-          stud_birthDate: item.stud_birthDate, 
-          stud_age: item.stud_age,
-          stud_4p: item.stud_4p,
-          stud_parent1: item.stud_parentName1 + "\n" + item.stud_parentMobile1,
-          stud_parent2: item.stud_parentName2 + "\n" + item.stud_parentMobile2,
-          stud_address: item.stud_address,
-          stud_status: item.stud_status,
-          stud_createdAt: item.createdAt,
-          stud_updatedAt: item.updatedAt,
+          user_name: item.user_firstName + '\n' + item.user_lastName,
+          user_mobileNumber: item.user_mobileNumber,
+          user_email: item.user_email,
+          user_gender: item.user_gender,
+          user_role: item.user_role,
+          user_status: item.user_status,
+          approval: item.user_approved,
+          user_createdAt: item.createdAt,
+          user_updatedAt: item.updatedAt,
         }));
-        setStudentProfile(modifiedData);
-      })
-      .catch((error) => {
-        console.error('Error fetching student profiles:', error);
-      });
-  }, []);
+        setUserProfile(modifiedData);
+      } catch (error) {
+        console.error('Error fetching user profiles:', error);
+      }
+    };
+    fetchData();
+  }, []); // The empty dependency array ensures the effect runs only once
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 200},
-    { field: 'stud_lrn', headerName: 'LRN', width: 200},
-    { field: 'stud_name', headerName: 'Name (Last, First Middle)', width: 250 },
-    { field: 'stud_gender', headerName: 'Gender', width: 150 },
-    { field: 'stud_birthDate', headerName: 'Birth Date', width: 150 },
-    { field: 'stud_age', headerName: 'Age', width: 75 },
-    { field: 'stud_4p', headerName: '4P', width: 75 },
-    { field: 'stud_parent1', headerName: 'Parent 1', width: 300 },
-    { field: 'stud_parent2', headerName: 'Parent 2', width: 300 },
-    { field: 'stud_address', headerName: 'Address', width: 150 },
+    { field: 'id', headerName: 'ID', width: 100},
+    { field: 'user_name', headerName: 'Name', width: 200},
+    { field: 'user_mobileNumber', headerName: 'Mobile Number', width: 150},
+    { field: 'user_email', headerName: 'Email', width: 250},
+    { field: 'user_gender', headerName: 'Gender', width: 150},
+    { field: 'user_role', headerName: 'Role', width: 150},
+    { 
+    field: 'user_createdAt', 
+    headerName: 'Date Created', 
+    width: 150,
+    // valueGetter: (params) => formatYearFromDate(params.row.createdAt),
+    },
     {
-      field: 'stud_status',
+      field: 'user_status',
       headerName: 'Status',
       width: 150,
       renderCell: (params) => (
@@ -83,18 +82,16 @@ const StudentProfileGrid = () => {
         </div>
       ),
     },
-    { field: 'stud_createdAt', headerName: 'Created', width: 200 },
-    { field: 'stud_updatedAt', headerName: 'Updated', width: 200 },
     {
       field: 'action',
       headerName: 'Action',
       width: 150,
       renderCell: (params) => (
         <div>
-        <IconButton onClick={() => handleAction(params.row.id)}>
+        <IconButton onClick={() => handleAction(params.row._id)}>
             <EditIcon />
           </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
+          <IconButton onClick={() => handleDelete(params.row._id)}>
             <DeleteOutlineIcon />
           </IconButton>
         </div>
@@ -112,24 +109,24 @@ const StudentProfileGrid = () => {
     console.log(`Delete user with ID: ${_id}`);
   };
 
-  const filteredStudentProfile = studentProfile.filter(student => 
-    student.id.toString().includes(searchValue) ||
-    student.stud_lrn.toLowerCase().includes(searchValue.toLowerCase()) ||
-    student.stud_name.toLowerCase().includes(searchValue.toLowerCase()) ||
-    student.stud_mobileNumber.toString().includes(searchValue) ||
-    student.stud_section.toLowerCase().includes(searchValue.toLowerCase()) ||
-    student.stud_grade.toLowerCase().includes(searchValue.toLowerCase()) ||
-    student.stud_gender.toLowerCase().includes(searchValue.toLowerCase()) ||
-    student.stud_status.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredUsers = userProfile.filter(user => 
+    user.id.toString().includes(searchValue) ||
+    user.user_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+    user.user_mobileNumber.toString().includes(searchValue) ||
+    user.user_email.toLowerCase().includes(searchValue.toLowerCase()) ||
+    user.user_gender.toLowerCase().includes(searchValue.toLowerCase()) ||
+    user.user_role.toLowerCase().includes(searchValue.toLowerCase()) ||
+    user.user_status.toLowerCase().includes(searchValue.toLowerCase()) ||
+    user.user_createdAt.toLowerCase().includes(searchValue.toLowerCase())
+);
 
   const handleFormOpen = () => {
-    console.log('Open Student Profile Form');
+    console.log('Open User Profile Form');
     setIsFormOpen(true);
   };
 
   const handleFormClose = () => {
-    console.log('Close Student Profile Form');
+    console.log('Close User Profile Form');
     setIsFormOpen(false);
   };
 
@@ -149,7 +146,7 @@ const StudentProfileGrid = () => {
       </div>
       </div>
       <DataGrid 
-      rows={filteredStudentProfile}
+      rows={filteredUsers}
       columns={columns}
       initialState={{
         pagination: {
@@ -169,4 +166,4 @@ const StudentProfileGrid = () => {
   );
 };
 
-export default StudentProfileGrid;
+export default UserProfileGrid;

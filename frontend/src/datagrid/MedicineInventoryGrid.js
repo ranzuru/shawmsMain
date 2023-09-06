@@ -6,7 +6,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
-const MedicineGrid = () => {
+const MedicineInventoryGrid = () => {
 
   const [searchValue, setSearchValue] = useState('');
   
@@ -96,7 +96,8 @@ const MedicineGrid = () => {
   
 
   return (
-    <div style={{ height: 500, width: '100%' }}>
+    <div className="flex flex-col h-full">
+      <div className="w-full max-w-screen-xl mx-auto px-4">
        <div className="mb-4 flex justify-end items-center">
        <Button variant="contained" color="primary">New Medicine</Button>
        <div className="ml-2">
@@ -124,7 +125,8 @@ const MedicineGrid = () => {
       disableRowSelectionOnClick  
       />
     </div>
+    </div>
   );
 };
 
-export default MedicineGrid;
+export default MedicineInventoryGrid;

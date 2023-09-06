@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbarExport, GridToolbarContainer } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -41,7 +41,7 @@ const ClinicRecordsGrid = () => {
     { field: 'clRc_reason', headerName: 'Reason', width: 150 },
     { field: 'clRc_mdc', headerName: 'Medicine', width: 150 },
     { field: 'clRc_timestamp', headerName: 'Timestamp', width: 150 },
-    { field: 'clRc_note', headerName: 'Note', width: 200 },
+    { field: 'clRc_note', headerName: 'Note', width: 150 },
     {
       field: 'action',
       headerName: 'Action',
@@ -69,6 +69,14 @@ const ClinicRecordsGrid = () => {
     console.log(`Delete user with ID: ${recordId}`);
   };
 
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarExport />
+      </GridToolbarContainer>
+    );
+  }
+
   const filteredUsers = record.filter(user => 
     user.clRc_id.toString().includes(searchValue) ||
     user.stud_lrn.toString().includes(searchValue) ||
@@ -84,7 +92,8 @@ const ClinicRecordsGrid = () => {
   
 
   return (
-    <div style={{ height: 500, width: '100%' }}>
+    <div className="flex flex-col h-full">
+      <div className="w-full max-w-screen-xl mx-auto px-4">
        <div className="mb-4 flex justify-end items-center">
        <Button variant="contained" color="primary">New Record</Button>
        <div className="ml-2">
@@ -100,6 +109,8 @@ const ClinicRecordsGrid = () => {
       <DataGrid 
       rows={filteredUsers}
       columns={columns}
+      slots={{
+        toolbar: CustomToolbar}}
       initialState={{
         pagination: {
           paginationModel: {
@@ -111,6 +122,7 @@ const ClinicRecordsGrid = () => {
       checkboxSelection
       disableRowSelectionOnClick  
       />
+    </div>
     </div>
   );
 };
