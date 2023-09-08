@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import ManageUserForm from '../forms/UserProfileForm.js'
+import AddDialog from '../forms/UserAddDialog.js'
 import axios from 'axios';
 
 const UserProfileGrid = () => {
@@ -160,7 +160,7 @@ const UserProfileGrid = () => {
       disableRowSelectionOnClick
       getRowId={(row) => row.id}  
       />
-      <ManageUserForm open={isFormOpen} onClose={handleFormClose} onCancel={handleFormClose} />
+      <AddDialog open={isFormOpen} onClose={handleFormClose} onCancel={handleFormClose} />
     </div>
     </div>
   );

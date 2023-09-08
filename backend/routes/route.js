@@ -53,8 +53,8 @@ router.get("/user-approval", getAllApprovalNeededUser);
 router.get("/student-profile", getStudentProfile);             
 router.get("/student-profile/:id", getStudentProfile);         
 router.post('/student-profile', postStudentProfile);           
-router.patch("/student-profile/:id", updateStudentProfile);    
-router.delete("/student-profile/:id", deleteStudentProfile);    
+router.patch("/student-profile/", updateStudentProfile);    
+router.patch("/student-profile/:id", deleteStudentProfile);    
 
 // ------------------------------ FACULTY PROFILE ROUTES
 router.get("/faculty-profile", getFacultyProfile);             

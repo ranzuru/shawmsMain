@@ -69,7 +69,7 @@ const AddFacultyDialog = ({ open, onClose }) => {
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
     }
-    reset({ facl_gender: '', facl_role: '',  facl_status: ''});    
+    reset();    
 };
 
 const onCancel = () => {
