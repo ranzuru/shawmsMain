@@ -1,22 +1,22 @@
 import React from 'react';
-import MedicalCheckUpGrid from '../datagrid/MedicalCheckUpGrid.js';
+import DataGrid from '../datagrid/StudentProfileGrid.js';
 import { Typography } from '@mui/material';
 
-const MedicalCheckup = () => {
+const ProgramProfile = () => {
   return (
     <div className="flex flex-col">
-      <div className="flex-grow overflow-hidden">
+      <div className="flex-grow">
       <div className="bg-black h-24 flex items-center">
         <Typography variant="h1" sx={{ 
           fontSize: { xs: '2rem', sm: '2rem', md: '2.25rem' }, 
           fontWeight: 'bold', color: 'white', py: { xs: 3, md: 6 }, pl: 2 }}>
-          Student Medical Check-Up
+         Program Profile
         </Typography>
         </div>
 
-        <div className="flex flex-col items-center justify-center h-full p-4">
+        <div className="flex flex-col items-center justify-center h-full p-4 overflow-y-auto">
           <div className="flex items-center justify-center w-full">
-            <MedicalCheckUpGrid />
+            <DataGrid />
           </div>
         </div>
       </div>
@@ -24,4 +24,4 @@ const MedicalCheckup = () => {
   );
 };
 
-export default MedicalCheckup;
+export default ProgramProfile;

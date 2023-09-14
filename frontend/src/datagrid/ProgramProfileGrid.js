@@ -5,8 +5,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import AddDialog from '../forms/UserAddDialog.js'
-import EditDialog from '../forms/UserEditDialog.js'
+import AddDialog from '../forms/StudentAddDialog.js'
+import EditDialog from '../forms/StudentEditDialog.js'
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -14,57 +14,65 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 
-const UserProfileGrid = () => {
+const StudentProfileGrid = () => {
 
   const [searchValue, setSearchValue] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userData, setUserData] = useState([]);
+  const [studentData, setStudentData] = useState([]);
   const [dialogInitialData, setDialogInitialData] = useState(null);
-  const [deleteUserId, setDeleteUserId] = useState(null);
-
+  const [deleteStudentId, setDeleteStudentId] = useState(null);
+  
   // ------------------------- POPULATE LIST FUNCTIONS
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/user-profile');
-        const modifiedData = response.data.map((item) => ({
+    axios
+      .get('http://localhost:5000/student-profile')
+      .then((response) => {
+        const databaseData = response.data.map((item) => ({
           id: item._id,
-          user_firstName: item.user_firstName,
-          user_lastName: item.user_lastName,
-          user_mobileNumber: item.user_mobileNumber,
-          user_email: item.user_email,
-          user_gender: item.user_gender,
-          user_role: item.user_role,
-          user_status: item.user_status,
-          approval: item.user_approved,
-          user_createdAt: item.createdAt,
-          user_updatedAt: item.updatedAt,
+          stud_lrn: item.stud_lrn, 
+          stud_firstName: item.stud_firstName,
+          stud_middleName: item.stud_middleName,
+          stud_lastName: item.stud_lastName,
+          stud_gender: item.stud_gender,
+          stud_birthDate: item.stud_birthDate, 
+          stud_age: item.stud_age,
+          stud_4p: item.stud_4p,
+          stud_parentName1: item.stud_parentName1,
+          stud_parentMobile1: item.stud_parentMobile1,
+          stud_parentName2: item.stud_parentName2,
+          stud_parentMobile2: item.stud_parentMobile2,
+          stud_address: item.stud_address,
+          stud_status: item.stud_status,
+          stud_createdAt: item.createdAt,
+          stud_updatedAt: item.updatedAt,
         }));
-        setUserData(modifiedData);
-      } catch (error) {
-        console.error('Error fetching user profiles:', error);
-      }
-    };
-    fetchData();
+        setStudentData(databaseData);
+      })
+      .catch((error) => {
+        console.error('Error fetching student profiles:', error);
+      });
   }, []);
 
   // ------------------------- LIST FUNCTIONS
   const columns = [
-    { field: 'id', headerName: 'ID', width: 100},
-    { field: 'user_name', headerName: 'Name', width: 200},
-    { field: 'user_mobileNumber', headerName: 'Mobile Number', width: 150},
-    { field: 'user_email', headerName: 'Email', width: 250},
-    { field: 'user_gender', headerName: 'Gender', width: 150},
-    { field: 'user_role', headerName: 'Role', width: 150},
-    { 
-    field: 'user_createdAt', 
-    headerName: 'Date Created', 
-    width: 150,
-    },
+    { field: 'id', headerName: 'ID', width: 200},
+    { field: 'stud_lrn', headerName: 'LRN', width: 200},
+    { field: 'stud_name', headerName: 'Name', width: 250 },
+    { field: 'stud_gender', headerName: 'Gender', width: 150 },
+    { field: 'stud_birthDate', headerName: 'Birth Date', width: 150 },
+    { field: 'stud_age', headerName: 'Age', width: 75 },
+    { field: 'stud_4p', headerName: '4P', width: 75, renderCell: (params) => (
+      <div>
+        {params.value ? 'Yes' : 'No'}
+      </div>
+    ), },
+    { field: 'stud_parent1', headerName: 'Parent 1', width: 300 },
+    { field: 'stud_parent2', headerName: 'Parent 2', width: 300 },
+    { field: 'stud_address', headerName: 'Address', width: 150 },
     {
-      field: 'user_status',
+      field: 'stud_status',
       headerName: 'Status',
       width: 150,
       renderCell: (params) => (
@@ -82,6 +90,8 @@ const UserProfileGrid = () => {
         </div>
       ),
     },
+    { field: 'stud_createdAt', headerName: 'Created', width: 200 },
+    { field: 'stud_updatedAt', headerName: 'Updated', width: 200 },
     {
       field: 'action',
       headerName: 'Action',
@@ -100,20 +110,25 @@ const UserProfileGrid = () => {
   ];
 
   // ------------------------- LIST DATA FORMAT & FILTER FUNCTIONS
-  const filteredUsers = userData.map(filter => ({
-    ...filter,
-    user_name: `${filter.user_lastName},\n ${filter.user_firstName}`,
-  })).filter(filter => 
-    filter.id.toString().includes(searchValue) ||
-    filter.user_name.toLowerCase().includes(searchValue.toLowerCase()) ||
-    filter.user_mobileNumber.toString().includes(searchValue) ||
-    filter.user_email.toLowerCase().includes(searchValue.toLowerCase()) ||
-    filter.user_gender.toLowerCase().includes(searchValue.toLowerCase()) ||
-    filter.user_role.toLowerCase().includes(searchValue.toLowerCase()) ||
-    filter.user_status.toLowerCase().includes(searchValue.toLowerCase()) ||
-    filter.user_createdAt.toLowerCase().includes(searchValue.toLowerCase())
-);
-// const formatYearFromDate = (dateString) => {
+  const filteredData = studentData.map(modifiedData => ({
+    ...modifiedData,
+    stud_name: `${modifiedData.stud_lastName},\n ${modifiedData.stud_firstName}\n ${modifiedData.stud_middleName}`,
+    stud_parent1: `${modifiedData.stud_parentName1},\n ${modifiedData.stud_parentMobile1}`,
+    stud_parent2: `${modifiedData.stud_parentName2},\n ${modifiedData.stud_parentMobile2}`,
+  })).filter(data => 
+    data.id.toString().includes(searchValue) ||
+    data.stud_lrn.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_gender.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_birthDate.includes(searchValue) ||
+    data.stud_age.includes(searchValue) ||
+    data.stud_4p.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_parent1.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_parent2.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_address.toLowerCase().includes(searchValue.toLowerCase()) ||
+    data.stud_status.toLowerCase().includes(searchValue.toLowerCase())
+  );
+  // const formatYearFromDate = (dateString) => {
   //   const date = new Date(dateString);
   //   const year = date.getFullYear();
   //   const month = String(date.getMonth() + 1).padStart(2, '0'); // Add leading zero if needed
@@ -126,15 +141,15 @@ const UserProfileGrid = () => {
     setSearchValue(event.target.value);
   };
   const handleAddDialogOpen = () => {
-    console.log('Open User Profile Form');
+    console.log('Open Student Profile Form');
     setIsAddDialogOpen(true);
   };
   const handleUpdateDialogOpen = (id) => {
     if (id) {
-      const selectedUser = userData.find((user) => user.id === id);
-      setDialogInitialData(selectedUser);
-      console.log(`Edit user with ID: ${selectedUser}`);
-      console.log('Open User Profile Form');
+      const selectedStudent = studentData.find((student) => student.id === id);
+      setDialogInitialData(selectedStudent);
+      console.log(`Edit user with ID: ${selectedStudent}`);
+      console.log('Open Student Profile Form');
     } else {
       // No user selected, clear the data
       setDialogInitialData(null);
@@ -142,38 +157,38 @@ const UserProfileGrid = () => {
     setIsEditDialogOpen(true);
   };
   const handleDeleteChange = (id) => {
-    setDeleteUserId(id);
+    setDeleteStudentId(id);
     setIsDeleteDialogOpen(true);
-    console.log(`Delete user with ID: ${id}`);
+    console.log(`Delete student with ID: ${id}`);
   };
   const handleDeleteConfirmation = () => {
-    if (deleteUserId) {
-      // Send an HTTP request to update user_status
+    if (deleteStudentId) {
+      // Send an HTTP request to update stud_status
       axios
-        .patch(`http://localhost:5000/user-profile/${deleteUserId}`, { user_status: 'DELETED' })
+        .patch(`http://localhost:5000/student-profile/${deleteStudentId}`, { stud_status: 'DELETED' })
         .then((response) => {
           if (response.status === 200) {
-            // Update the UI by filtering out the deleted user
-            const updatedUserProfile = userData.filter(
-              (user) => user.id !== deleteUserId
+            // Update the UI by filtering out the deleted student
+            const updatedData = studentData.filter(
+              (student) => student.id !== deleteStudentId
             );
-            setUserData(updatedUserProfile);
+            setStudentData(updatedData);
           }
         })
         .catch((error) => {
-          console.error('Error deleting user:', error);
+          console.error('Error deleting student:', error);
         })
         .finally(() => {
-          setIsDeleteDialogOpen(false);
-          setDeleteUserId(null);
+          setIsDeleteDialogOpen(false); // Close the confirmation dialog
+          setDeleteStudentId(null); // Reset the student ID
         });
     }  
   };
   const handleDialogClose = () => {
-    console.log('Close User Profile Form');
+    console.log('Close Student Profile Form');
     setIsAddDialogOpen(false);
     setIsEditDialogOpen(false);
-    console.log('Clear User Initial Data');
+    console.log('Clear Student Initial Data');
     setDialogInitialData(null);
   };
 
@@ -192,13 +207,13 @@ const UserProfileGrid = () => {
           onChange={handleSearchChange}
         />
       </div>
-
+      
       {/* -------------------- <DELETE CONFIRMATION DIALOG */}
       <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Are you sure you want to delete this user?
+                Are you sure you want to delete this student?
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -214,7 +229,7 @@ const UserProfileGrid = () => {
 
       </div>
       <DataGrid 
-      rows={filteredUsers}
+      rows={filteredData}
       columns={columns}
       initialState={{
         pagination: {
@@ -235,4 +250,4 @@ const UserProfileGrid = () => {
   );
 };
 
-export default UserProfileGrid;
+export default StudentProfileGrid;

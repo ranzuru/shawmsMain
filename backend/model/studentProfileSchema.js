@@ -58,6 +58,10 @@ const studentProfileSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    class_id: {
+        type: String,
+        required: true,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model("student_profile", studentProfileSchema)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -19,53 +19,45 @@ import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 
-const EditFacultyDialog = ({ open, onClose, initialData }) => {
+const AddFacultyDialog = ({ open, onClose }) => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
     const [genderValue, setGenderValue] = useState('');
-    const [roleValue, setRoleValue] = useState('');
+    const [roleValue, setRolePValue] = useState('');
     const [statusValue, setStatusValue] = useState('');
   
-const validationSchema = Yup.object({
-    facl_employeeId: Yup.string().required('Employee ID is required'),
-    facl_firstName: Yup.string().required('First Name is required'),
-    facl_middleName: Yup.string().required('Middle Name is required'),
-    facl_lastName: Yup.string().required('Last Name is required'),
-    facl_gender: Yup.string().required('Gender is required'),
-    facl_mobileNumber: Yup.string().required('Parent 1 Mobile Number is required').min(10, "Your phone number must be 10 digits"),
-    facl_role: Yup.string().required('Role is required'),
-    facl_status: Yup.string().required('Parent 1 Mobile Number is required'),
-  });
+    const validationSchema = Yup.object({
+      facl_employeeId: Yup.string().required('Employee ID is required'),
+      facl_lastName: Yup.string().required('Last Name is required'),
+      facl_middleName: Yup.string().required('Middle Name is required'),
+      facl_firstName: Yup.string().required('First Name is required'),
+      facl_gender: Yup.string().required('Gender is required'),
+      facl_mobileNumber: Yup.string().required('Phone Number is required').min(10, "Your phone number must be 10 digits"),
+      facl_role: Yup.string().required('Role is required'),   
+    });
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: yupResolver(validationSchema),
-    defaultValues: initialData || {},
+    defaultValues: {
+      facl_gender: '', // Set the default gender value here
+      facl_role: '', 
+      facl_status: '',  // Set the default role value here
+    },
 });
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
-  useEffect(() => {
-    if (initialData) {
-      // Verify if initialData is being applied to state variables
-      console.log("Initial Data:", initialData);
-      // Initialize state values
-      setGenderValue(initialData.facl_gender || "");
-      setStatusValue(initialData.facl_status || "");
-      setRoleValue(initialData.facl_role || "");
-    }
-  }, [initialData]);
-
   const onSubmit = async (data, e) => {
     try {
         // Make an HTTP POST request to your API endpoint
-        const response = await axios.patch('http://localhost:5000/faculty-profile', data);
+        const response = await axios.post('http://localhost:5000/faculty-profile', data);
         console.log(response.data); // Display response from the server
 
         e.target.reset();
-        setSnackbarMessage('Faculty edited successfully!');
+        setSnackbarMessage('Account created successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
             // Reset the form
@@ -85,13 +77,13 @@ const onCancel = () => {
   reset();
   onClose();
   setGenderValue('');
-  setRoleValue('');
+  setRolePValue('');
   setStatusValue('');
 };
-
+  
   return (
     <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
-      <DialogTitle>EDIT FACULTY</DialogTitle>
+      <DialogTitle>ADD Faculty</DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
       <DialogContent>
         <DialogContentText>
@@ -103,7 +95,6 @@ const onCancel = () => {
             name="facl_employeeId"
             label="Employee ID"
             fullWidth
-            required
             margin="normal"
             variant="outlined"
             {...register("facl_employeeId")}
@@ -121,7 +112,7 @@ const onCancel = () => {
                 error={!!errors.facl_status} // Show error state if there's a validation error
                 helperText={errors.facl_status?.message} // Display the error message
             >
-                <MenuItem value="" disabled>Select the current status of the faculty</MenuItem>
+                <MenuItem value="" disabled>Current Status of the Faculty</MenuItem>
                 <MenuItem value="Active">Active</MenuItem>
                 <MenuItem value="Inactive">Inactive</MenuItem>
             </Select>
@@ -132,7 +123,6 @@ const onCancel = () => {
             name="facl_firstName"
             label="First Name"
             fullWidth
-            required
             margin="normal"
             variant="outlined"
             {...register("facl_firstName")}
@@ -144,7 +134,6 @@ const onCancel = () => {
             name="facl_middleName"
             label="Middle Name"
             fullWidth
-            required
             margin="normal"
             variant="outlined"
             {...register("facl_middleName")}
@@ -155,7 +144,6 @@ const onCancel = () => {
             name="facl_lastName"
             label="Last Name"
             fullWidth
-            required
             margin="normal"
             variant="outlined"
             {...register("facl_lastName")}
@@ -211,7 +199,7 @@ const onCancel = () => {
             {...register("facl_role")}
             label="Gender"
             value={roleValue}
-            onChange={(e) => setRoleValue(e.target.value)}
+            onChange={(e) => setRolePValue(e.target.value)}
             error={!!errors.facl_role} // Show error state if there's a validation error
             helperText={errors.facl_role?.message} // Display the error message
           >
@@ -236,7 +224,7 @@ const onCancel = () => {
           Cancel
         </Button>
         <Button type="submit" variant="contained" startIcon={<PersonAddAltOutlinedIcon />}>
-          Edit Faculty
+          Add Faculty
         </Button>
       </DialogActions>
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose} anchorOrigin={{
@@ -252,4 +240,4 @@ const onCancel = () => {
   );
 };
 
-export default EditFacultyDialog;
+export default AddFacultyDialog;

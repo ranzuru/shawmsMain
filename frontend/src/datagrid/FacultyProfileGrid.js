@@ -6,13 +6,23 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddDialog from '../forms/FacultyAddDialog.js'
+import EditDialog from '../forms/FacultyEditDialog.js'
 import axios from 'axios';
+import Dialog from '@mui/material/Dialog'; // Import the Dialog component
+import DialogTitle from '@mui/material/DialogTitle'; // Import DialogTitle
+import DialogContent from '@mui/material/DialogContent'; // Import DialogContent
+import DialogContentText from '@mui/material/DialogContentText'; // Import DialogContentText
+import DialogActions from '@mui/material/DialogActions'; //
 
-const FaculyProfileGrid = () => {
+const FacultyProfileGrid = () => {
 
   const [searchValue, setSearchValue] = useState('');
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [facultyProfile, setFacultyProfile] = useState([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [facultyData, setFacultyData] = useState([]);
+  const [dialogInitialData, setDialogInitialData] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
   
   const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
@@ -33,7 +43,9 @@ const FaculyProfileGrid = () => {
         const modifiedData = response.data.map((item) => ({
           id: item._id,
           facl_employeeId: item.facl_employeeId, 
-          facl_name: item.facl_lastName + ", " + item.facl_firstName + " " + item.facl_middleName,
+          facl_lastName: item.facl_lastName,
+          facl_firstName: item.facl_firstName,
+          facl_middleName: item.facl_middleName,
           facl_gender: item.facl_gender, 
           facl_mobileNumber: item.facl_mobileNumber, 
           facl_role: item.facl_role, 
@@ -41,7 +53,7 @@ const FaculyProfileGrid = () => {
           facl_profileCreated: item.createdAt,
           facl_profileUpdated: item.updatedAt,
         }));
-        setFacultyProfile(modifiedData);
+        setFacultyData(modifiedData);
       })
       .catch((error) => {
         console.error('Error fetching student profiles:', error);
@@ -82,10 +94,10 @@ const FaculyProfileGrid = () => {
       width: 150,
       renderCell: (params) => (
         <div>
-        <IconButton onClick={() => handleAction(params.row.id)}>
+        <IconButton onClick={() => handleUpdateDialogOpen(params.row.id)}>
             <EditIcon />
           </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
+          <IconButton onClick={() => handleDeleteChange(params.row.id)}>
             <DeleteOutlineIcon />
           </IconButton>
         </div>
@@ -93,17 +105,53 @@ const FaculyProfileGrid = () => {
     },
   ];
 
-  const handleAction = (_id) => {
-    // Implement your action logic here
-    console.log(`Edit user with ID: ${_id}`);
+  const handleUpdateDialogOpen = (id) => {
+    if (id) {
+      const selectedUser = facultyData.find((user) => user.id === id);
+      setDialogInitialData(selectedUser);
+      console.log(`Edit user with ID: ${selectedUser}`);
+      console.log('Open Student Profile Form');
+    } else {
+      // No user selected, clear the data
+      setDialogInitialData(null);
+    }
+    setIsEditDialogOpen(true);
+  };
+  const handleDeleteChange = (id) => {
+    setDeleteId(id); // Set the student ID to delete
+    setIsDeleteDialogOpen(true); // Open the confirmation dialog
+    console.log(`Delete student with ID: ${id}`);
   };
 
-  const handleDelete = (_id) => {
-    // Implement your delete logic here
-    console.log(`Delete user with ID: ${_id}`);
+  const handleDeleteConfirmation = () => {
+    if (deleteId) {
+      // Send an HTTP request to update faculty status
+      axios
+        .patch(`http://localhost:5000/faculty-profile/${deleteId}`, { stud_status: 'DELETED' })
+        .then((response) => {
+          if (response.status === 200) {
+            // Update the UI by filtering out the deleted faculty
+            const updatedFacultyProfile = facultyData.filter(
+              (faculty) => faculty.id !== deleteId
+            );
+            setFacultyData(updatedFacultyProfile);
+          }
+        })
+        .catch((error) => {
+          console.error('Error deleting faculty:', error);
+        })
+        .finally(() => {
+          setIsDeleteDialogOpen(false); // Close the confirmation dialog
+          setDeleteId(null); // Reset the faculty ID
+        });
+    }  
   };
 
-  const filteredFacultyProfile = facultyProfile.filter(filter => 
+  const filteredFacultyProfile = facultyData.map(filter => ({
+    ...filter,
+    facl_name: `${filter.facl_lastName},\n ${filter.facl_firstName}\n ${filter.facl_middleName}`,
+
+  })).filter(filter => 
     filter.id.toString().includes(searchValue) ||
     filter.facl_employeeId.toString().includes(searchValue) ||
     filter.facl_name.toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -115,21 +163,24 @@ const FaculyProfileGrid = () => {
     filter.updatedAt.includes(searchValue)
   );
 
-  const handleModalOpen = () => {
+  const handleDialogOpen = () => {
     console.log('Opening modal');
-    setIsFormOpen(true);
+    setIsAddDialogOpen(true);
   };
 
-  const handleModalClose = () => {
-    console.log('Closing modal');
-    setIsFormOpen(false);
+  const handleDialogClose = () => {
+    console.log('Close Student Profile Form');
+    setIsAddDialogOpen(false);
+    setIsEditDialogOpen(false);
+    console.log('Clear Student Initial Data');
+    setDialogInitialData(null);
   };
 
   return (
     <div className="flex flex-col h-full">
       <div className="w-full max-w-screen-xl mx-auto px-4">
        <div className="mb-4 flex justify-end items-center">
-       <Button variant="contained" color="primary" onClick={handleModalOpen}>New User</Button>
+       <Button variant="contained" color="primary" onClick={handleDialogOpen}>New Faculty</Button>
        <div className="ml-2">
         <TextField
           label="Search"
@@ -139,6 +190,22 @@ const FaculyProfileGrid = () => {
           onChange={handleSearchChange}
         />
       </div>
+      <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete this student?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setIsDeleteDialogOpen(false)} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleDeleteConfirmation} color="primary">
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
       </div>
       <DataGrid 
       rows={filteredFacultyProfile}
@@ -155,10 +222,11 @@ const FaculyProfileGrid = () => {
       disableRowSelectionOnClick
       getRowId={(row) => row.id}  
       />
-      <AddDialog open={isFormOpen} onClose={handleModalClose} onCancel={handleModalClose} />
+      <AddDialog open={isAddDialogOpen} onClose={handleDialogClose} onCancel={handleDialogClose} />
+      <EditDialog open={isEditDialogOpen} onClose={handleDialogClose} onCancel={handleDialogClose} initialData={dialogInitialData} key={dialogInitialData?.id || 'new'}/>
     </div>
     </div>
   );
 };
 
-export default FaculyProfileGrid;
+export default FacultyProfileGrid;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -26,6 +26,8 @@ const AddStudentDialog = ({ open, onClose }) => {
     const [genderValue, setGenderValue] = useState('');
     const [fourPValue, setFourPValue] = useState('');
     const [statusValue, setStatusValue] = useState('');
+    const [classValue, setClassValue] = useState('');
+    const [classOptions, setClassOptions] = useState([]);
   
 const validationSchema = Yup.object({
     stud_lrn: Yup.string().required('Student LRN is required'),
@@ -36,17 +38,31 @@ const validationSchema = Yup.object({
     stud_birthDate: Yup.string().required('Birth Date is required'),
     stud_age: Yup.string().required('Age is required'),
     stud_4p: Yup.string().required('4P is required'),
+    class_id: Yup.string().required('Grade & Section is required'),
     stud_parentName1: Yup.string().required('Parent 1 Name is required'),
     stud_parentMobile1: Yup.string().required('Parent 1 Mobile Number is required').min(10, "Your phone number must be 10 digits"),
     stud_address: Yup.string().required('Address is required'),
   });
 
+  useEffect(() => {
+    // Make an HTTP GET request to fetch the classes
+    axios.get('http://localhost:5000/class-profile')
+      .then((response) => {
+        const classes = response.data; // Assuming the response contains an array of classes
+        setClassOptions(classes);
+      })
+      .catch((error) => {
+        console.error('Error fetching classes:', error);
+      });
+  }, []);
+
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      stud_gender: '', // Set the default gender value here
+      stud_gender: '',
       stud_4p: '', 
-      stud_status: '',  // Set the default role value here
+      stud_status: '',
+      class_id: '',
     },
 });
 
@@ -73,7 +89,7 @@ const validationSchema = Yup.object({
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
     }
-    reset({ stud_gender: '', stud_4p: '',  stud_status: ''});    
+    reset();    
 };
 
 const onCancel = () => {
@@ -83,6 +99,7 @@ const onCancel = () => {
   setGenderValue('');
   setFourPValue('');
   setStatusValue('');
+  setClassValue('');
 };
   
   return (
@@ -111,18 +128,47 @@ const onCancel = () => {
             <Select
                 name="stud_status"
                 {...register("stud_status")}
-                label="Role"
+                label="Status"
                 value={statusValue}
                 onChange={(e) => setStatusValue(e.target.value)}
                 error={!!errors.stud_status} // Show error state if there's a validation error
                 helperText={errors.stud_status?.message} // Display the error message
-            >
+              >
                 <MenuItem value="" disabled>Select the current status of the student</MenuItem>
                 <MenuItem value="Not Enrolled">Not Enrolled</MenuItem>
                 <MenuItem value="Enrolled">Enrolled</MenuItem>
                 <MenuItem value="On Process">On Process</MenuItem>
                 <MenuItem value="Transferred">Transferred</MenuItem>
                 <MenuItem value="Dropped">Dropped</MenuItem>
+            </Select>
+            </FormControl>
+            <FormControl fullWidth variant="outlined" margin="normal" required>
+            <InputLabel>Class</InputLabel>
+            <Select
+                name="class_id"
+                {...register("class_id")}
+                label="Class"
+                value={classValue}
+                onChange={(e) => setClassValue(e.target.value)}
+                error={!!errors.class_id} // Show error state if there's a validation error
+                helperText={errors.class_id?.message} // Display the error message
+            >
+                <MenuItem value="" disabled>
+                Select the current class of the student
+              </MenuItem>
+              {/* Map over classOptions to create MenuItems */}
+              {classOptions.length > 0 ? (
+                // Map over classOptions to create MenuItems
+                classOptions.map((classOption) => (
+                  <MenuItem key={classOption._id} value={classOption._id}>
+                    {`${classOption.class_grade} - ${classOption.class_section}`}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="" disabled>
+                  Loading classes...
+                </MenuItem>
+              )}
             </Select>
             </FormControl>
         </div>

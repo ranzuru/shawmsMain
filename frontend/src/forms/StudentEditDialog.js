@@ -106,11 +106,10 @@ const onCancel = () => {
             name="stud_lrn"
             label="Student LRN"
             fullWidth
-            required
+            disabled
             margin="normal"
             variant="outlined"
             {...register("stud_lrn")}
-            defaultValue={initialData?.stud_lrn || ""}
             error={!!errors.stud_lrn} // Show error state if there's a validation error
             helperText={errors.stud_lrn?.message} // Display the error message
             />
@@ -119,7 +118,7 @@ const onCancel = () => {
             <Select
                 name="stud_status"
                 {...register("stud_status")}
-                label="Role"
+                label="Status"
                 value={statusValue}
                 onChange={(e) => setStatusValue(e.target.value)}
                 error={!!errors.stud_status} // Show error state if there's a validation error

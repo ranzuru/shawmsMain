@@ -178,8 +178,18 @@ const Sidebar = () => {
             { to: '/user-profile', primary: 'User Profiles' },
           ]}
         />
-        <SidebarLink to="/students-profile" primary="Student Profile" isActive={isActive('/students-profile')} icon={<Person2Outlined />}/>
-        <SidebarLink to="/faculty-profile" primary="Faculty Profile" isActive={isActive('/faculty-profile')} icon={<SupervisorAccountOutlined />}/>
+        <SidebarSubmenu
+          primary="Profiles"
+          icon={<ManageAccountsOutlined />}
+          submenuName="profiles"
+          isActive={isActive}
+          submenuLinks={[
+            { to: '/student-profile', primary: 'Student Profiles' },
+            { to: '/faculty-profile', primary: 'Faculty Profiles' },
+            { to: '/class-profile', primary: 'Class Profiles' },
+            { to: '/program-profile', primary: 'Program Profiles' },
+          ]}
+        />
         <SidebarSubmenu
           primary="Clinic Programs"
           icon={<SpaOutlinedIcon />}
@@ -188,10 +198,20 @@ const Sidebar = () => {
           submenuLinks={[
             { to: '/dengue-monitoring', primary: 'Dengue Monitoring' },
             { to: '/immunization', primary: 'Immunization' },
-            { to: '/medical-checkup', primary: 'Medical Checkup' },
-            { to: '/faculty-checkup', primary: 'Faculty Checkup' },
             { to: '/deworming-monitoring', primary: 'Deworming Monitoring' },
             { to: '/feeding-program', primary: 'Feeding Program' },
+            { to: '/nutritional-status', primary: 'Nutritional Status (Form 8)' },
+          ]}
+        />
+        <SidebarSubmenu
+          primary="Medical Checkup"
+          icon={<SpaOutlinedIcon />}
+          submenuName="medicalCheckup"
+          isActive={isActive}
+          submenuLinks={[
+            { to: '/student-checkup', primary: 'Student Checkup' },
+            { to: '/faculty-checkup', primary: 'Faculty Checkup' },
+
           ]}
         />
         <SidebarLink to="/clinic-records" primary="Clinic Records" isActive={isActive('/clinic-records')} icon={<AssignmentIndOutlined />}/>

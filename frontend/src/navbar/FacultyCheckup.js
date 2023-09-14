@@ -10,7 +10,7 @@ const FacultyCheckup = () => {
         <Typography variant="h1" sx={{ 
           fontSize: { xs: '2rem', sm: '2rem', md: '2.25rem' }, 
           fontWeight: 'bold', color: 'white', py: { xs: 3, md: 6 }, pl: 2 }}>
-          Faculty Check-Up
+          Faculty Medical Check-Up
         </Typography>
         </div>
 

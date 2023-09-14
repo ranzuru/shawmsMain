@@ -71,6 +71,7 @@ const postFacultyProfile = asyncHandler (async (req, res) => {
 // @route Update/ PATCH Single FacultyProfile
 // @access Private
 const updateFacultyProfile = asyncHandler (async (req, res) => {
+    try {
     const { 
         _id, 
         facl_employeeId, 
@@ -80,40 +81,47 @@ const updateFacultyProfile = asyncHandler (async (req, res) => {
         facl_gender,
         facl_mobileNumber,
         facl_role,
-        facl_grade, 
-        facl_section,
         facl_status } = req.body;
     // check if Faculty LRN of the current FacultyProfile exists
-    const createdFacultyProfile = await facultyProfileSchema.findById(_id).exec();
-    if (!createdFacultyProfile) {
-        res.status(400).json({ message: 'Faculty Profile not found' });
-    };
-    createdFacultyProfile.facl_lrn = facl_lrn;
-    createdFacultyProfile.facl_name = facl_name;
-    createdFacultyProfile.facl_mobileNumber = facl_mobileNumber;
-    createdFacultyProfile.facl_grade = facl_grade;
-    createdFacultyProfile.facl_section = facl_section;
-    createdFacultyProfile.facl_gender = facl_gender;
-    createdFacultyProfile.facl_status = facl_status;
-    const updatedFacultyProfile = await createdFacultyProfile.save();
-    res.json({ message: `Faculty Profile ${updatedFacultyProfile.facl_name} updated` });
+    const createdFacultyProfile = await facultyProfileSchema.findOne({facl_employeeId: facl_employeeId}).exec();
+        if (!createdFacultyProfile) {
+            res.status(400).json({ message: 'Faculty Profile not found' });
+        };
+        createdFacultyProfile.facl_employeeId = facl_employeeId;
+        createdFacultyProfile.facl_lastName = facl_lastName;
+        createdFacultyProfile.facl_firstName = facl_firstName;
+        createdFacultyProfile.facl_middleName = facl_middleName;
+        createdFacultyProfile.facl_mobileNumber = facl_mobileNumber;
+        createdFacultyProfile.facl_role = facl_role;
+        createdFacultyProfile.facl_gender = facl_gender;
+        createdFacultyProfile.facl_status = facl_status;
+        const updatedStudentProfile = await createdFacultyProfile.save();
+        res.json({ message: `Faculty Profile ${updatedStudentProfile.stud_lrn} updated` });
+    } catch (error) {
+        console.error('Error in updateStudentProfile:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
 });
 
 // @desc Delete Single FacultyProfile
 // @route Delete Single FacultyProfile
 // @access Private
 const deleteFacultyProfile = asyncHandler (async (req, res) => {
-    const {  _id } = req.body;
-    if (!_id) {
-        return res.status(400).json({ message: 'Faculty LRN is required' });
-    };
-    const deleteFacultyProfile = await facultyProfileSchema.findById(_id).exec();
-    if (!deleteFacultyProfile) {
-        return res.status(400).json({ message: 'FacultyProfile not found' });
-    };
-    const result = await deleteFacultyProfile.deleteOne();
-    const reply = `email ${result.FacultyProfile_email} with ID ${result._id} deleted`;
-    res.json(reply);
+    try {
+        const { id } = req.params;
+        
+        // check if Faculty ID of the selected Faculty Profile exists
+        const createdFacultyProfile = await facultyProfileSchema.findById(id).exec();
+        if (!createdFacultyProfile) {
+            res.status(400).json({ message: 'Faculty Profile not found' });
+        };
+        createdFacultyProfile.facl_status = "DELETED";
+        const updatedFacultyProfile = await createdFacultyProfile.save();
+        res.json({ message: `Faculty Profile ${updatedFacultyProfile.id} deleted` });
+    } catch (error) {
+        console.error('Error in delete Faculty Profile:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
 });
 
 module.exports = { 

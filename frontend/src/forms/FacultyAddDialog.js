@@ -19,7 +19,7 @@ import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 
-const AddFacultyDialog = ({ open, onClose }) => {
+const AddDewormingDialog = ({ open, onClose }) => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -240,4 +240,4 @@ const onCancel = () => {
   );
 };
 
-export default AddFacultyDialog;
+export default AddDewormingDialog;

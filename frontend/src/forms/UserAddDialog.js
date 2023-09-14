@@ -104,6 +104,7 @@ const onCancel = () => {
         <DialogContentText>
           Please fill in the user details.
         </DialogContentText>
+        
         <TextField
           name="user_firstName"
           label="First Name"
@@ -124,6 +125,7 @@ const onCancel = () => {
           error={!!errors.user_lastName} // Show error state if there's a validation error
           helperText={errors.user_lastName?.message} // Display the error message
         />
+        <div style={{ display: 'flex', gap: '16px' }}>
         <TextField
           name="user_mobileNumber"
           label="Mobile Number"
@@ -157,6 +159,8 @@ const onCancel = () => {
           error={!!errors.user_email} // Show error state if there's a validation error
           helperText={errors.user_email?.message} // Display the error message
             />
+        </div>
+        <div style={{ display: 'flex', gap: '16px' }}>
         <TextField
           name="user_password"
           label="Password"
@@ -205,6 +209,8 @@ const onCancel = () => {
           error={!!errors.confirmPassword} // Show error state if there's a validation error
           helperText={errors.confirmPassword?.message} // Display the error message
         />
+        </div>
+        <div style={{ display: 'flex', gap: '16px' }}>
         <FormControl fullWidth variant="outlined" margin="normal" required>
           <InputLabel>Gender</InputLabel>
           <Select
@@ -239,6 +245,8 @@ const onCancel = () => {
             <MenuItem value="Teacher">Teacher</MenuItem>
           </Select>
         </FormControl>
+        </div>
+        
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel} variant="outlined">

@@ -206,51 +206,63 @@ const getAllApprovalNeededUser = asyncHandler (async (req, res) => {
 // @route Update/ PATCH Single User
 // @access Private
 const updateUser = asyncHandler (async (req, res) => {
-    const { _id, user_firstName, user_lastName, user_mobileNumber, user_email, user_password, user_role } = req.body;
-    // confirm data
-    if (!_id || !user_email) {
-        res.status(400).json({ message: 'all fields are required' });
-    };
-    // check if email of the current user exists
-    const createdUser = await userProfileSchema.findById(_id).exec();
-    if (!createdUser) {
-        res.status(400).json({ message: 'user not found' });
-    };
-    // check for duplicate
-    const duplicate = await userProfileSchema.findOne({ _id }).lean().exec();
-    // allow updates to the original user
-    if(duplicate && duplicate?._id.toString() !== _id) {
-        return res.status(409).json({ message: 'duplicate email' });
-    };
-    createdUser.user_firstName = user_firstName;
-    createdUser.user_lastName = user_lastName;
-    createdUser.user_mobileNumber = user_mobileNumber;
-    createdUser.user_email = user_email;
-    if (user_password) {
-        // hash password
-        // 10 salt rounds
-        createdUser.user_password = await bcrypt.hash(user_password, 10);
-    };
-    createdUser.user_role = user_role;
-    const userProfileApproval = await createdUser.save();
-    res.json({ message: `user ${userProfileApproval.user_email} updated` });
+    try {
+        const { 
+            user_firstName, 
+            user_lastName, 
+            user_mobileNumber, 
+            user_email, 
+            user_password, 
+            user_role,
+            user_status } = req.body;
+        // check if email of the current user exists
+        const createdUser = await userProfileSchema.findById(req.params.id).exec();
+        if (!createdUser) {
+            res.status(400).json({ message: 'user not found' });
+        };
+        // allow updates to the original user
+        const duplicate = await userProfileSchema.findOne({ user_email: user_email }).lean().exec();
+        if(duplicate && duplicate?.user_email.toString() !== user_email) {
+            return res.status(409).json({ message: 'duplicate email' });
+        };
+        createdUser.user_firstName = user_firstName;
+        createdUser.user_lastName = user_lastName;
+        createdUser.user_mobileNumber = user_mobileNumber;
+        createdUser.user_email = user_email;
+        if (user_password) {
+            // hash password
+            // 10 salt rounds
+            createdUser.user_password = await bcrypt.hash(user_password, 10);
+        };
+        createdUser.user_role = user_role;
+        createdUser.user_status = user_status;
+        const updateData = await createdUser.save();
+        res.json({ message: `user ${updateData.user_email} updated` });
+    } catch (error) {
+        console.error('Error in update Student Profile:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
 });
 
 // @desc Delete Single User
 // @route Delete Single User
 // @access Private
 const deleteUser = asyncHandler (async (req, res) => {
-    const { _id } = req.body;
-    if (!_id) {
-        return res.status(400).json({ message: 'user id required' });
-    };
-    const deleteUser = await userProfileSchema.findById(_id).exec();
-    if (!deleteUser) {
-        return res.status(400).json({ message: 'user not found' });
-    };
-    const result = await deleteUser.deleteOne();
-    const reply = `email ${result.user_email} with ID ${result._id} deleted`;
-    res.json(reply);
+    try {
+        const { id } = req.params;
+        
+        // check if User ID of the current StudentProfile exists
+        const createdUserProfile = await userProfileSchema.findById(id).exec();
+        if (!createdUserProfile) {
+            res.status(400).json({ message: 'User Profile not found' });
+        };
+        createdUserProfile.stud_status = "DELETED";
+        const updatedStudentProfile = await createdUserProfile.save();
+        res.json({ message: `User Profile ${updatedStudentProfile.id} deleted` });
+    } catch (error) {
+        console.error('Error in delete User Profile:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
 });
 
 module.exports = {
